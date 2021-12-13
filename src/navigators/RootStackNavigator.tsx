@@ -1,13 +1,16 @@
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import SettingPage from '../screens/SettingPage';
+import HomeTabNavigator from './HomeTabNavigator';
 
 const RootStack = createNativeStackNavigator();
 
 const RootStackNavigator = () => {
   return (
-    <RootStack.Navigator>
-      <RootStack.Screen name="Setting" component={SettingPage} />
+    <RootStack.Navigator
+      screenOptions={() => ({
+        headerShown: false,
+      })}>
+      <RootStack.Screen name="Home" component={HomeTabNavigator} />
     </RootStack.Navigator>
   );
 };
