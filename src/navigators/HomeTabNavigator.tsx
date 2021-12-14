@@ -1,6 +1,7 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Settings from '../screens/Settings';
+import Route from '../screens/Route';
 
 const Tab = createBottomTabNavigator();
 
@@ -10,8 +11,8 @@ const HomeTabNavigator = () => {
       screenOptions={() => ({
         headerShown: false,
       })}>
+      <Tab.Screen name="Route" component={Route} />
       <Tab.Screen name="Plan" component={Settings} />
-      <Tab.Screen name="Route" component={Settings} />
       <Tab.Screen name="Settings" component={Settings} />
     </Tab.Navigator>
   );
