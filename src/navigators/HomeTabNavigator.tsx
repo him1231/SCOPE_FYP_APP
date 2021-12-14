@@ -8,6 +8,7 @@ const Tab = createBottomTabNavigator();
 const HomeTabNavigator = () => {
   return (
     <Tab.Navigator
+      initialRouteName="Settings"
       screenOptions={() => ({
         headerShown: false,
       })}>
