@@ -144,13 +144,6 @@ function* handleUpdateNodeData(): any {
           const cost = (distance / 1000 / normalCarSpeed) * 60;
 
           nodeData[routeStopKey][nextStopKey] = cost;
-
-          // console.log('routeStopKey', routeStopKey);
-          // console.log('nextStopKey', nextStopKey);
-          // console.log('currentStop', currentStop);
-          // console.log('nextStop', nextStop);
-          // console.log('distance', distance);
-          // console.log('cost', cost);
         }
       });
   });

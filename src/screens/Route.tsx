@@ -13,6 +13,7 @@ import {selectNodeData, selectStopData} from '../redux/selectors/route';
 import {route} from '../utils/route';
 import _ from 'lodash';
 import {INodeData} from '../models/route';
+import {humanWalkingSpeed} from '../constants/route';
 
 const locationString = (location: LatLng) =>
   `lat:${location?.latitude.toFixed(3)}, 
@@ -37,22 +38,33 @@ const Route = () => {
       stopData.forEach(stop => {
         const stopCoord = {lat: stop.lat, lon: stop.long};
         const startDistance = getDistance(startCoord, stopCoord);
-        if (startDistance < 1000) {
-          newNoteData['start'][stop.stop] = startDistance;
+        if (startDistance < 300) {
+          newNoteData['start'][stop.stop] =
+            (startDistance / 1000 / humanWalkingSpeed) * 60;
         }
 
         const endDistance = getDistance(stopCoord, endCoord);
-        if (endDistance < 1000) {
+        if (endDistance < 300) {
           newNoteData[stop.stop] = {};
-          newNoteData[stop.stop]['end'] = endDistance;
+          newNoteData[stop.stop]['end'] =
+            (endDistance / 1000 / humanWalkingSpeed) * 60;
         }
       });
 
-      console.log('newNoteData', newNoteData);
+      const avoidList: string[] = [];
 
-      const result = route(_.merge(nodeData, newNoteData), 'start', 'end');
+      [...Array(5)].forEach((item, index) => {
+        const result = route(
+          _.merge(nodeData, newNoteData),
+          'start',
+          'end',
+          avoidList,
+        );
 
-      console.log('route result', result);
+        console.log('route result', index, result);
+
+        avoidList.push(result.path[result.path.length - 2]);
+      });
     }
   };
 
