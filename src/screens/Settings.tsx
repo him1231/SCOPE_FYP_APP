@@ -1,14 +1,15 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import Graph from 'node-dijkstra';
-import {getDistance} from 'geolib';
 import {useDispatch, useSelector} from 'react-redux';
 import {
+  getRouteData,
   getRouteStopData,
   getStopData,
   updateNodeData,
 } from '../redux/actions/route';
 import {
   selectNodeData,
+  selectRouteData,
   selectRouteStopData,
   selectStopData,
 } from '../redux/selectors/route';
@@ -27,6 +28,7 @@ const Settings = () => {
   const dispatch = useDispatch();
   const stopData = useSelector(selectStopData);
   const routeStopData = useSelector(selectRouteStopData);
+  const routeData = useSelector(selectRouteData);
   const nodeData = useSelector(selectNodeData);
 
   useEffect(() => {
@@ -42,16 +44,27 @@ const Settings = () => {
   }, [routeStopData]);
 
   useEffect(() => {
-    if (stopData.length !== 0 && Object.entries(nodeData).length === 0) {
+    if (routeData.length === 0) {
+      dispatch(getRouteData());
+    }
+  }, [routeData]);
+
+  useEffect(() => {
+    if (
+      stopData.length !== 0 &&
+      routeStopData.length !== 0 &&
+      Object.entries(nodeData).length === 0 &&
+      true
+    ) {
       dispatch(updateNodeData());
     }
-  }, [stopData, nodeData]);
+  }, [stopData, routeStopData, nodeData]);
 
   const routePath = () => {
     const result = route(
-      nodeData,
-      '3B54D43994CAC165', //stopData[randomNubmer(stopData.length)].stop,
-      '07521BB848913F74', //stopData[randomNubmer(stopData.length)].stop,
+      {...nodeData},
+      stopData[randomNubmer(stopData.length)].stop,
+      stopData[randomNubmer(stopData.length)].stop,
     );
 
     console.log('route path result', result);

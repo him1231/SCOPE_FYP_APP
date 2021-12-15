@@ -13,9 +13,12 @@ export const selectRouteStopData = createSelector(
   state => state.get('routeStopData')?.data ?? [],
 );
 
+export const selectRouteData = createSelector(
+  selectRouteState,
+  state => state.get('routeData')?.data ?? [],
+);
+
 export const selectNodeData = createSelector(
   selectRouteState,
   state => state.get('nodeData') ?? {},
 );
-
-// export {selectStopData, selectNodeData};

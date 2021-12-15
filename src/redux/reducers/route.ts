@@ -2,11 +2,17 @@ import ITypedMap from './ITypedMap';
 import {fromJS} from 'immutable';
 import {ActionType} from 'typesafe-actions';
 import * as RouteActions from '../actions/route';
-import {IStopApi, INodeData, IRouteStopApi} from '../../models/route';
+import {
+  IStopApi,
+  INodeData,
+  IRouteStopApi,
+  IRouteApi,
+} from '../../models/route';
 
 interface IRouteState {
   stopData?: IStopApi;
   routeStopData?: IRouteStopApi;
+  routeData?: IRouteApi;
   nodeData?: INodeData;
   error?: Error;
 }
@@ -28,6 +34,11 @@ export default (
     case RouteActions.GET_ROUTE_STOP_DATA_SUCCESS:
       return state.set('routeStopData', action.payload.data);
     case RouteActions.GET_ROUTE_STOP_DATA_FAIL:
+      return state.set('error', action.payload.error);
+
+    case RouteActions.GET_ROUTE_DATA_SUCCESS:
+      return state.set('routeData', action.payload.data);
+    case RouteActions.GET_ROUTE_DATA_FAIL:
       return state.set('error', action.payload.error);
 
     case RouteActions.UPDATE_NODE_DATA_SUCCESS:

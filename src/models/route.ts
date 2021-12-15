@@ -29,4 +29,23 @@ export type IRouteStopApi = {
   data: IRouteStop[];
 };
 
+export type IRoute = {
+  route: string;
+  bound: string;
+  service_type: string;
+  orig_en: string;
+  orig_tc: string;
+  orig_sc: string;
+  dest_en: string;
+  dest_tc: string;
+  dest_sc: string;
+};
+
+export type IRouteApi = {
+  type: string;
+  version: string;
+  generated_timestamp: string;
+  data: IRoute[];
+};
+
 export type INodeData = {[key: string]: {[key: string]: number}};
