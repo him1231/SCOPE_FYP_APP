@@ -1,5 +1,4 @@
 import React, {useEffect} from 'react';
-import Graph from 'node-dijkstra';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   getRouteData,
@@ -13,14 +12,8 @@ import {
   selectRouteStopData,
   selectStopData,
 } from '../redux/selectors/route';
-import {INodeData} from '../models/route';
 import {Button, StyleSheet, View} from 'react-native';
-
-const route = (node: INodeData, start: string, end: string) => {
-  const route = new Graph(node);
-  const result = route.path(start, end, {cost: true, avoid: []});
-  return result;
-};
+import {route} from '../utils/route';
 
 const randomNubmer = (max: number) => Math.floor(Math.random() * max);
 
