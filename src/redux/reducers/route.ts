@@ -7,6 +7,7 @@ import {
   INodeData,
   IRouteStopApi,
   IRouteApi,
+  PlanResult,
 } from '../../models/route';
 
 interface IRouteState {
@@ -15,6 +16,7 @@ interface IRouteState {
   routeData?: IRouteApi;
   nodeData?: INodeData;
   error?: Error;
+  planResults?: PlanResult[];
 }
 
 type IRouteActions = ActionType<typeof RouteActions>;
@@ -43,6 +45,15 @@ export default (
 
     case RouteActions.UPDATE_NODE_DATA_SUCCESS:
       return state.set('nodeData', action.payload.nodeData);
+
+    // get node data from server;
+    case RouteActions.GET_NODE_DATA_SUCCESS:
+      return state.set('nodeData', action.payload.data);
+    case RouteActions.GET_NODE_DATA_FAIL:
+      return state.set('error', action.payload.error);
+
+    case RouteActions.SAVE_PLAN_RESULT:
+      return state.set(`planResults`, action.payload.data);
 
     default:
       return state;

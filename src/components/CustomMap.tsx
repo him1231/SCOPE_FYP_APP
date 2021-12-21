@@ -19,7 +19,7 @@ interface Props {
   setEndLocation?: (_: LatLng) => void;
 }
 
-const Map: React.FC<Props> = React.memo(props => {
+const CustomMap: React.FC<Props> = React.memo(props => {
   const {
     style,
     useGoogleMap,
@@ -57,4 +57,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Map;
+export default CustomMap;

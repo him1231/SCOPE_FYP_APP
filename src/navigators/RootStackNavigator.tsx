@@ -2,7 +2,11 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import HomeTabNavigator from './HomeTabNavigator';
 
-const RootStack = createNativeStackNavigator();
+export type RootStackParamList = {
+  Home: undefined;
+};
+
+const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 const RootStackNavigator = () => {
   return (

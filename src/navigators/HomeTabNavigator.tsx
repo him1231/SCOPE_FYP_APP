@@ -1,19 +1,25 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Settings from '../screens/Settings';
-import Route from '../screens/Route';
+import Search from '../screens/Search';
+import PlanStackNavigator from './PlanStackNavigator';
 
-const Tab = createBottomTabNavigator();
+export type HomeTabParamList = {
+  Plan: undefined;
+  Search: undefined;
+  Settings: undefined;
+};
+
+const Tab = createBottomTabNavigator<HomeTabParamList>();
 
 const HomeTabNavigator = () => {
   return (
     <Tab.Navigator
-      initialRouteName="Route"
       screenOptions={() => ({
         headerShown: false,
       })}>
-      <Tab.Screen name="Route" component={Route} />
-      <Tab.Screen name="Plan" component={Settings} />
+      <Tab.Screen name="Plan" component={PlanStackNavigator} />
+      <Tab.Screen name="Search" component={Search} />
       <Tab.Screen name="Settings" component={Settings} />
     </Tab.Navigator>
   );

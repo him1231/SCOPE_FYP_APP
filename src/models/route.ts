@@ -14,6 +14,37 @@ export type IStopApi = {
   data: IStop[];
 };
 
+export type IStopApiFromServer = {
+  status: string;
+  data: {
+    _id: string;
+    stopId: string;
+    createdAt: string;
+    lat: number;
+    locationType: string;
+    lon: number;
+    name: string;
+    timezone: string;
+    updatedAt: string;
+    zoneId: string;
+  }[];
+};
+
+export type IRouteApiFromServer = {
+  status: string;
+  data: {
+    _id: string;
+    routeId: string;
+    agency: string;
+    createdAt: string;
+    longName: string;
+    shortName: string;
+    type: string;
+    updatedAt: string;
+    url: string;
+  }[];
+};
+
 export type IRouteStop = {
   route: string;
   bound: string;
@@ -33,6 +64,9 @@ export type IRoute = {
   route: string;
   bound: string;
   service_type: string;
+  name_en?: string;
+  name_tc?: string;
+  name_sc?: string;
   orig_en: string;
   orig_tc: string;
   orig_sc: string;
@@ -49,3 +83,8 @@ export type IRouteApi = {
 };
 
 export type INodeData = {[key: string]: {[key: string]: number}};
+
+export type PlanResult = {
+  cost: number;
+  path: string[];
+};

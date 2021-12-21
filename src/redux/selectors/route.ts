@@ -22,3 +22,8 @@ export const selectNodeData = createSelector(
   selectRouteState,
   state => state.get('nodeData') ?? {},
 );
+
+export const selectPlanResult = createSelector(
+  selectRouteState,
+  state => state.get('planResults') ?? [],
+);

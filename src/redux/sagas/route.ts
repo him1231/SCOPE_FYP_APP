@@ -1,27 +1,35 @@
 import {getDistance} from 'geolib';
 import {call, put, select, takeLatest} from 'redux-saga/effects';
 import {
+  getNodeDataFromServer,
   getRouteDataFromApi,
+  getRouteDataFromServer,
   getRouteStopDataFromApi,
   getStopDataFromApi,
+  getStopDataFromServer,
 } from '../../api/route';
 import {humanWalkingSpeed, normalCarSpeed} from '../../constants/route';
 import {
   INodeData,
   IRouteApi,
+  IRouteApiFromServer,
   IRouteStop,
   IRouteStopApi,
   IStop,
   IStopApi,
+  IStopApiFromServer,
 } from '../../models/route';
 import {hideLoading, showLoading} from '../actions/general';
 import {
+  getNodeDataFail,
+  getNodeDataSuccess,
   getRouteDataFail,
   getRouteDataSuccess,
   getRouteStopDataFail,
   getRouteStopDataSuccess,
   getStopDataFail,
   getStopDataSuccess,
+  GET_NODE_DATA,
   GET_ROUTE_DATA,
   GET_ROUTE_STOP_DATA,
   GET_STOP_DATA,
@@ -41,6 +49,66 @@ function* handleGetStopData(): any {
     yield put(getStopDataSuccess(result));
   } catch (err: any) {
     yield put(getStopDataFail(err));
+  } finally {
+    yield put(hideLoading());
+  }
+}
+
+function* handleGetStopDataFromServer(): any {
+  try {
+    yield put(showLoading());
+    const result: IStopApiFromServer = yield call(getStopDataFromServer);
+
+    const data: IStopApi = {
+      type: '',
+      version: '',
+      generated_timestamp: '',
+      data: result.data.map(item => ({
+        stop: item.stopId,
+        lat: item.lat.toString(),
+        long: item.lon.toString(),
+        name_en: '',
+        name_tc: '',
+        name_sc: '',
+      })),
+    };
+
+    yield put(getStopDataSuccess(data));
+  } catch (err: any) {
+    yield put(getStopDataFail(err));
+  } finally {
+    yield put(hideLoading());
+  }
+}
+
+function* handleGetRouteDataFromServer(): any {
+  try {
+    yield put(showLoading());
+    const result: IRouteApiFromServer = yield call(getRouteDataFromServer);
+
+    const data: IRouteApi = {
+      type: '',
+      version: '',
+      generated_timestamp: '',
+      data: result.data.map(item => ({
+        route: item.routeId,
+        bound: '',
+        service_type: '',
+        name_en: item.shortName,
+        name_tc: item.shortName,
+        name_sc: item.shortName,
+        orig_en: item.longName.split(' - ')[0],
+        orig_tc: item.longName.split(' - ')[0],
+        orig_sc: item.longName.split(' - ')[0],
+        dest_en: item.longName.split(' - ')[1],
+        dest_tc: item.longName.split(' - ')[1],
+        dest_sc: item.longName.split(' - ')[1],
+      })),
+    };
+
+    yield put(getRouteDataSuccess(data));
+  } catch (err: any) {
+    yield put(getRouteDataFail(err));
   } finally {
     yield put(hideLoading());
   }
@@ -154,9 +222,22 @@ function* handleUpdateNodeData(): any {
   yield put(hideLoading());
 }
 
+function* handleGetNodeData(): any {
+  try {
+    yield put(showLoading());
+    const result: INodeData = yield call(getNodeDataFromServer);
+    yield put(getNodeDataSuccess(result));
+  } catch (err: any) {
+    yield put(getNodeDataFail(err));
+  } finally {
+    yield put(hideLoading());
+  }
+}
+
 export function* watchHandleRoute() {
-  yield takeLatest(GET_STOP_DATA, handleGetStopData);
+  yield takeLatest(GET_STOP_DATA, handleGetStopDataFromServer);
   yield takeLatest(GET_ROUTE_STOP_DATA, handleGetRouteStopData);
-  yield takeLatest(GET_ROUTE_DATA, handleGetRouteData);
+  yield takeLatest(GET_ROUTE_DATA, handleGetRouteDataFromServer);
   yield takeLatest(UPDATE_NODE_DATA, handleUpdateNodeData);
+  yield takeLatest(GET_NODE_DATA, handleGetNodeData);
 }

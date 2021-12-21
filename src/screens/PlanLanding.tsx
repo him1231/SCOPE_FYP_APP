@@ -3,23 +3,34 @@ import React, {useState} from 'react';
 import {StyleSheet} from 'react-native';
 import {LatLng} from 'react-native-maps';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import CustomButton from '../components/CustomButton';
 import LocationInput from '../components/LocationInput';
-import Map from '../components/Map';
+import CustomMap from '../components/CustomMap';
 import Separator from '../components/Separator';
 import Shadow from '../components/styles/Shadow';
-import {selectNodeData, selectStopData} from '../redux/selectors/route';
+import {
+  selectNodeData,
+  selectRouteData,
+  selectStopData,
+} from '../redux/selectors/route';
 import {route} from '../utils/route';
-import _ from 'lodash';
-import {INodeData} from '../models/route';
+import {merge} from 'lodash';
+import {INodeData, PlanResult} from '../models/route';
 import {humanWalkingSpeed} from '../constants/route';
+import {savePlanResult} from '../redux/actions/route';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {PlanStackParamList} from '../navigators/PlanStackNavigator';
 
 const locationString = (location: LatLng) =>
   `lat:${location?.latitude.toFixed(3)}, 
   lon:${location?.longitude.toFixed(3)}`;
 
-const Route = () => {
+const PlanLanding = () => {
+  const dispatch = useDispatch();
+  const navigation = useNavigation<NavigationProp<PlanStackParamList>>();
+
+  const routeData = useSelector(selectRouteData);
   const stopData = useSelector(selectStopData);
   const nodeData = useSelector(selectNodeData);
   const [startLatLng, setStartLatLng] = useState<LatLng | undefined>(undefined);
@@ -51,26 +62,75 @@ const Route = () => {
         }
       });
 
-      const avoidList: string[] = [];
+      const avoidCarList = routeData
+        .filter(item => item.name_sc?.startsWith('N'))
+        .map(item => item.route);
 
-      [...Array(5)].forEach((item, index) => {
-        const result = route(
-          _.merge(nodeData, newNoteData),
+      const avoidList: string[] = [
+        ...Object.keys(nodeData).filter(item =>
+          avoidCarList.some(car => item.startsWith(car + '-')),
+        ),
+      ];
+
+      const planResults: PlanResult[] = [];
+
+      for (let _ of [...Array(5)]) {
+        const result: PlanResult = route(
+          merge(JSON.parse(JSON.stringify(nodeData)), newNoteData),
           'start',
           'end',
           avoidList,
         );
 
-        console.log('route result', index, result);
+        if (result.path !== null) {
+          planResults.push(result);
+          const car = result.path.find(item => item.split('-').length === 3);
+          if (car) {
+            const avoidCarList = Object.keys(nodeData).filter(key =>
+              key.startsWith(car.split('-')[0] + '-'),
+            );
 
-        avoidList.push(result.path[result.path.length - 2]);
-      });
+            avoidList.push(...avoidCarList);
+          }
+        } else {
+          break;
+        }
+      }
+
+      dispatch(savePlanResult(planResults));
+      navigation.navigate('PlanResult');
+    } else {
+      // test();
     }
   };
 
+  // const test = () => {
+  //   const newNodeData = Object.fromEntries(
+  //     new Map(
+  //       Object.entries(nodeData).map(item => {
+  //         const [nodeKey, nodeValue] = item;
+  //         const test = Object.entries(nodeValue);
+  //         const newTest = test.map(item => {
+  //           const newItem: [string, number] = [
+  //             item[0],
+  //             item[1] * 1 + item[1] * 2 + item[1] * 3 + item[1] * 4,
+  //           ];
+  //           return newItem;
+  //         });
+  //         const entries = new Map(newTest);
+  //         const obj = Object.fromEntries(entries);
+  //         return [nodeKey, obj];
+  //       }),
+  //     ),
+  //   );
+  // };
+
   return (
     <SafeAreaView style={styles.container}>
-      <Map setStartLocation={setStartLatLng} setEndLocation={setEndLatLng} />
+      <CustomMap
+        setStartLocation={setStartLatLng}
+        setEndLocation={setEndLatLng}
+      />
       <LocationInput
         title="start"
         placeholder="select the start location"
@@ -116,4 +176,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Route;
+export default PlanLanding;
