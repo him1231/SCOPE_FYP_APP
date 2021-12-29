@@ -1,28 +1,48 @@
-import React from 'react';
-import {View, StyleSheet, Button} from 'react-native';
-import {useDispatch} from 'react-redux';
-import {getNodeData, getStopData, getRouteData} from '../redux/actions/route';
+import React, {memo, useState} from 'react';
+import {FlatList, SafeAreaView, StyleSheet, View} from 'react-native';
+import {useSelector} from 'react-redux';
+import CustomInput from '../components/CustomInput';
+import RouteSearchItem from '../components/RouteSearchItem';
+import Separator from '../components/Separator';
+import Shadow from '../components/styles/Shadow';
+import image from '../image';
+import {IRoute} from '../models/route';
+import {selectRouteData} from '../redux/selectors/route';
 
 const Search = () => {
-  const dispatch = useDispatch();
+  const routeData = useSelector(selectRouteData);
 
-  const onPressGetNodeData = () => {
-    dispatch(getNodeData());
+  const [data, setData] = useState<IRoute[]>(routeData);
+
+  const renderItem = ({item}: {item: IRoute}) => {
+    return <RouteSearchItem route={item} />;
   };
 
-  const onPressGetStopData = () => {
-    dispatch(getStopData());
-  };
-
-  const onPressGetRouteData = () => {
-    dispatch(getRouteData());
+  const onSearchTextChange = (searchText: string) => {
+    setData(
+      routeData.filter(route =>
+        route.name_en?.toLowerCase().includes(searchText.toLowerCase()),
+      ),
+    );
   };
 
   return (
     <View style={styles.container}>
-      <Button title="get Node Data from Api" onPress={onPressGetNodeData} />
-      <Button title="get Stop Data from Api" onPress={onPressGetStopData} />
-      <Button title="get Route Data from Api" onPress={onPressGetRouteData} />
+      <SafeAreaView style={[styles.header, Shadow]}>
+        <CustomInput
+          icon={image.ICON.SEARCH}
+          onValueChange={onSearchTextChange}
+        />
+        <Separator />
+      </SafeAreaView>
+      <FlatList
+        data={data}
+        renderItem={renderItem}
+        keyExtractor={(_, i) => `${i}`}
+        contentContainerStyle={styles.flatList}
+        ItemSeparatorComponent={() => <Separator size={20} />}
+        extraData={data}
+      />
     </View>
   );
 };
@@ -31,8 +51,14 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     height: '100%',
-    justifyContent: 'center',
+  },
+  header: {
+    width: '100%',
     alignItems: 'center',
+    backgroundColor: 'red',
+  },
+  flatList: {
+    padding: 20,
   },
 });
 

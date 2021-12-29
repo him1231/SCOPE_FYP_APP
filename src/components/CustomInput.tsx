@@ -2,9 +2,10 @@ import React, {useRef} from 'react';
 import {
   StyleSheet,
   TextInput,
-  View,
+  Image,
   Text,
   TouchableOpacity,
+  ImageSourcePropType,
 } from 'react-native';
 import Separator from './Separator';
 import Shadow from './styles/Shadow';
@@ -12,13 +13,14 @@ import Shadow from './styles/Shadow';
 interface Props {
   initValue?: string;
   title?: string;
+  icon?: ImageSourcePropType;
   placeholder?: string;
   onPress?: () => void;
   onValueChange?: (_: string) => void;
 }
 
-const LocationInput = React.memo((props: Props) => {
-  const {initValue, title, placeholder, onPress, onValueChange} = props;
+const CustomInput = React.memo((props: Props) => {
+  const {initValue, title, icon, placeholder, onPress, onValueChange} = props;
   const textInputRef = useRef<TextInput>(null);
 
   const onPressContainer = () => {
@@ -30,6 +32,7 @@ const LocationInput = React.memo((props: Props) => {
       style={[styles.container, Shadow]}
       activeOpacity={1}
       onPress={onPress ?? onPressContainer}>
+      {icon && <Image style={styles.icon} source={icon} />}
       {title && <Text>{title}</Text>}
       {title && <Separator />}
       <TextInput
@@ -55,9 +58,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 20,
   },
+  icon: {
+    width: 20,
+    height: 20,
+    resizeMode: 'contain',
+    marginRight: 10,
+  },
   textInput: {
     flex: 1,
   },
 });
 
-export default LocationInput;
+export default CustomInput;

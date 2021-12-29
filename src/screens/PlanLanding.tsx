@@ -5,7 +5,7 @@ import {LatLng} from 'react-native-maps';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
 import CustomButton from '../components/CustomButton';
-import LocationInput from '../components/LocationInput';
+import CustomInput from '../components/CustomInput';
 import CustomMap from '../components/CustomMap';
 import Separator from '../components/Separator';
 import Shadow from '../components/styles/Shadow';
@@ -131,13 +131,13 @@ const PlanLanding = () => {
         setStartLocation={setStartLatLng}
         setEndLocation={setEndLatLng}
       />
-      <LocationInput
+      <CustomInput
         title="start"
         placeholder="select the start location"
         initValue={startLatLng ? locationString(startLatLng) : undefined}
       />
       <Separator />
-      <LocationInput
+      <CustomInput
         title="end"
         placeholder="select the end location"
         initValue={endLatLng ? locationString(endLatLng) : undefined}
