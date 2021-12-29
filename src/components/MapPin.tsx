@@ -1,6 +1,7 @@
 import React, {FC, memo} from 'react';
-import {Button, StyleSheet} from 'react-native';
-import {Callout, LatLng, Marker} from 'react-native-maps';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {LatLng, Marker} from 'react-native-maps';
+import image from '../image';
 
 interface Props {
   coordinate: LatLng;
@@ -14,17 +15,33 @@ const MapPin: FC<Props> = memo(props => {
   const onPressAsStart = () => {
     if (setStartLocation) setStartLocation(coordinate);
   };
+
   const onPressAsEnd = () => {
     if (setEndLocation) setEndLocation(coordinate);
   };
+
   return (
     <Marker coordinate={coordinate} tracksViewChanges={false}>
-      <Callout>
-        <Button title="As Start" onPress={onPressAsStart} />
-        <Button title="As End" onPress={onPressAsEnd} />
-      </Callout>
+      <View style={styles.pinContainer}>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={onPressAsStart}>
+            <Text style={styles.buttonText}>start</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={onPressAsEnd}>
+            <Text style={styles.buttonText}>end</Text>
+          </TouchableOpacity>
+        </View>
+        <Image source={image.ICON.PIN} />
+      </View>
     </Marker>
   );
+});
+
+const styles = StyleSheet.create({
+  pinContainer: {},
+  buttonContainer: {},
+  button: {},
+  buttonText: {},
 });
 
 export default MapPin;

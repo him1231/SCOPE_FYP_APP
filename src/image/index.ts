@@ -4,5 +4,6 @@ export default {
     SEARCH: require('./source/search.png'),
     SETTING: require('./source/setting.png'),
     CLEAR: require('./source/clear.png'),
+    PIN: require('./source/pin.png'),
   },
 };

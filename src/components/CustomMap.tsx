@@ -32,6 +32,16 @@ const CustomMap: React.FC<Props> = React.memo(props => {
     undefined,
   );
 
+  const onSetStartLocation = (coord: LatLng) => {
+    setCurrentSelection(undefined);
+    if (setStartLocation) setStartLocation(coord);
+  };
+
+  const onSetEndLocation = (coord: LatLng) => {
+    setCurrentSelection(undefined);
+    if (setEndLocation) setEndLocation(coord);
+  };
+
   return (
     <MapView
       provider={useGoogleMap ? PROVIDER_GOOGLE : PROVIDER_DEFAULT}
@@ -43,8 +53,8 @@ const CustomMap: React.FC<Props> = React.memo(props => {
       {currentSelection !== undefined && (
         <MapPin
           coordinate={currentSelection}
-          setStartLocation={setStartLocation}
-          setEndLocation={setEndLocation}
+          setStartLocation={onSetStartLocation}
+          setEndLocation={onSetEndLocation}
         />
       )}
     </MapView>
