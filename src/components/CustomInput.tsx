@@ -6,15 +6,20 @@ import {
   Text,
   TouchableOpacity,
   ImageSourcePropType,
+  StyleProp,
+  ViewStyle,
+  ImageStyle,
 } from 'react-native';
 import image from '../image';
 import Separator from './Separator';
 import Shadow from './styles/Shadow';
 
 interface Props {
+  style?: StyleProp<ViewStyle>;
   initValue?: string;
   title?: string;
   icon?: ImageSourcePropType;
+  iconStyle?: StyleProp<ImageStyle>;
   placeholder?: string;
   onPress?: () => void;
   onValueChange?: (_: string) => void;
@@ -23,9 +28,11 @@ interface Props {
 
 const CustomInput = React.memo((props: Props) => {
   const {
+    style,
     initValue,
     title,
     icon,
+    iconStyle,
     placeholder,
     onPress,
     onValueChange,
@@ -51,18 +58,22 @@ const CustomInput = React.memo((props: Props) => {
 
   return (
     <TouchableOpacity
-      style={[styles.container, Shadow]}
+      style={[styles.container, Shadow, style]}
       activeOpacity={1}
       onPress={onPress ?? onPressContainer}>
-      {icon && <Image style={styles.icon} source={icon} />}
-      {title && <Text style={styles.title}>{title}</Text>}
-      {/* {title && <Separator />} */}
+      {icon && <Image style={[styles.icon, iconStyle]} source={icon} />}
+      {title && (
+        <Text style={[styles.title, icon ? {} : styles.marginLeft20]}>
+          {title}
+        </Text>
+      )}
       <TextInput
         defaultValue={initValue}
         editable={onPress === undefined}
         ref={textInputRef}
         style={styles.textInput}
         placeholder={placeholder}
+        placeholderTextColor={'lightgrey'}
         value={value}
         onChangeText={onChangeText}
       />
@@ -88,10 +99,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   title: {
-    width: 35,
-    marginLeft: 20,
+    width: 40,
     marginRight: 10,
   },
+  marginLeft20: {
+    marginLeft: 20,
+  },
+
   icon: {
     width: 20,
     height: 20,

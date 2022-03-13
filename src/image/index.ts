@@ -5,5 +5,6 @@ export default {
     SETTING: require('./source/setting.png'),
     CLEAR: require('./source/clear.png'),
     PIN: require('./source/pin.png'),
+    CIRCLE: require('./source/circle.png'),
   },
 };

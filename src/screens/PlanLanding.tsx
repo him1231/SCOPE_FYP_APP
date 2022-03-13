@@ -21,6 +21,7 @@ import {humanWalkingSpeed} from '../constants/route';
 import {savePlanResult} from '../redux/actions/route';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {PlanStackParamList} from '../navigators/PlanStackNavigator';
+import image from '../image';
 
 const locationString = (location: LatLng) =>
   `lat:${location?.latitude.toFixed(3)}, 
@@ -74,7 +75,7 @@ const PlanLanding = () => {
 
       const planResults: PlanResult[] = [];
 
-      for (let _ of [...Array(5)]) {
+      for (let _ of [...Array(3)]) {
         const result: PlanResult = route(
           merge(JSON.parse(JSON.stringify(nodeData)), newNoteData),
           'start',
@@ -132,13 +133,17 @@ const PlanLanding = () => {
         setEndLocation={setEndLatLng}
       />
       <CustomInput
-        title="start"
+        iconStyle={{tintColor: 'red'}}
+        icon={image.ICON.CIRCLE}
+        title="start:"
         placeholder="select the start location"
         initValue={startLatLng ? locationString(startLatLng) : undefined}
       />
       <Separator />
       <CustomInput
-        title="end"
+        iconStyle={{tintColor: 'lime'}}
+        icon={image.ICON.CIRCLE}
+        title="end:"
         placeholder="select the end location"
         initValue={endLatLng ? locationString(endLatLng) : undefined}
       />

@@ -30,10 +30,10 @@ const Search = () => {
     <View style={styles.container}>
       <SafeAreaView style={[styles.header, Shadow]}>
         <CustomInput
+          style={styles.input}
           icon={image.ICON.SEARCH}
           onValueChange={onSearchTextChange}
         />
-        <Separator />
       </SafeAreaView>
       <FlatList
         data={data}
@@ -56,6 +56,9 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     backgroundColor: 'red',
+  },
+  input: {
+    marginVertical: 10,
   },
   flatList: {
     padding: 20,

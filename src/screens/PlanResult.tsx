@@ -4,7 +4,11 @@ import {useSelector} from 'react-redux';
 import Separator from '../components/Separator';
 import Shadow from '../components/styles/Shadow';
 import {PlanResult} from '../models/route';
-import {selectPlanResult, selectRouteData} from '../redux/selectors/route';
+import {
+  selectPlanResult,
+  selectRouteData,
+  selectStopData,
+} from '../redux/selectors/route';
 
 const RouteResult = () => {
   const data = useSelector(selectPlanResult);

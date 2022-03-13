@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {StyleProp, StyleSheet, Text, ViewStyle} from 'react-native';
 import MapView, {
-  CalloutSubview,
+  Polyline,
   LatLng,
   Marker,
   PROVIDER_DEFAULT,
@@ -32,18 +32,25 @@ const CustomMap: React.FC<Props> = React.memo(props => {
     undefined,
   );
 
+  const [startCoord, setStartCoord] = useState<LatLng | undefined>(undefined);
+
+  const [endCoord, setEndCoord] = useState<LatLng | undefined>(undefined);
+
   const onSetStartLocation = (coord: LatLng) => {
     setCurrentSelection(undefined);
     if (setStartLocation) setStartLocation(coord);
+    setStartCoord(coord);
   };
 
   const onSetEndLocation = (coord: LatLng) => {
     setCurrentSelection(undefined);
     if (setEndLocation) setEndLocation(coord);
+    setEndCoord(coord);
   };
 
   return (
     <MapView
+      userInterfaceStyle={'light'}
       provider={useGoogleMap ? PROVIDER_GOOGLE : PROVIDER_DEFAULT}
       style={[styles.map, style]}
       initialRegion={initialRegion}
@@ -56,6 +63,13 @@ const CustomMap: React.FC<Props> = React.memo(props => {
           setStartLocation={onSetStartLocation}
           setEndLocation={onSetEndLocation}
         />
+      )}
+      {startCoord !== undefined && <Marker coordinate={startCoord} />}
+      {endCoord !== undefined && (
+        <Marker coordinate={endCoord} pinColor={'lime'} />
+      )}
+      {startCoord && endCoord && (
+        <Polyline coordinates={[startCoord, endCoord]} lineDashPattern={[5]} />
       )}
     </MapView>
   );
