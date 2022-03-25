@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleProp, StyleSheet, Text, ViewStyle} from 'react-native';
 import MapView, {
   Polyline,
@@ -9,6 +9,7 @@ import MapView, {
   Region,
 } from 'react-native-maps';
 import {centerOfHongKong} from '../constants/map';
+import image from '../image';
 import MapPin from './MapPin';
 
 interface Props {
@@ -17,6 +18,9 @@ interface Props {
   style?: StyleProp<ViewStyle>;
   setStartLocation?: (_: LatLng) => void;
   setEndLocation?: (_: LatLng) => void;
+  disableSelect?: boolean;
+  lineData?: LatLng[];
+  focusMarkers?: string[];
 }
 
 const CustomMap: React.FC<Props> = React.memo(props => {
@@ -26,6 +30,9 @@ const CustomMap: React.FC<Props> = React.memo(props => {
     initialRegion = centerOfHongKong,
     setStartLocation,
     setEndLocation,
+    disableSelect,
+    lineData,
+    focusMarkers,
   } = props;
 
   const [currentSelection, setCurrentSelection] = useState<LatLng | undefined>(
@@ -48,14 +55,25 @@ const CustomMap: React.FC<Props> = React.memo(props => {
     setEndCoord(coord);
   };
 
+  useEffect(() => {
+    if (focusMarkers) {
+      mapRef?.fitToSuppliedMarkers(focusMarkers, {animated: true});
+    }
+  }, [focusMarkers]);
+
+  var mapRef: MapView | null = null;
+
   return (
     <MapView
+      ref={ref => {
+        mapRef = ref;
+      }}
       userInterfaceStyle={'light'}
       provider={useGoogleMap ? PROVIDER_GOOGLE : PROVIDER_DEFAULT}
       style={[styles.map, style]}
       initialRegion={initialRegion}
       onPress={e => {
-        setCurrentSelection(e.nativeEvent.coordinate);
+        if (!disableSelect) setCurrentSelection(e.nativeEvent.coordinate);
       }}>
       {currentSelection !== undefined && (
         <MapPin
@@ -70,6 +88,38 @@ const CustomMap: React.FC<Props> = React.memo(props => {
       )}
       {startCoord && endCoord && (
         <Polyline coordinates={[startCoord, endCoord]} lineDashPattern={[5]} />
+      )}
+
+      {lineData && (
+        <>
+          <Polyline
+            coordinates={lineData}
+            strokeWidth={4}
+            strokeColor={'red'}
+            strokeColors={lineData.map(
+              (_, i) =>
+                `rgb(${255 * (1 - i / lineData.length)},
+              ${255 * (i / lineData.length)},0)`,
+            )}
+            geodesic={true}
+            tappable={true}
+          />
+          {lineData.map((data, i) => (
+            <Marker
+              key={i}
+              image={image.ICON.TRANSPARENT}
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 8,
+                borderWidth: 4,
+                borderColor: `rgb(${255 * (1 - i / lineData.length)},
+                ${255 * (i / lineData.length)},0)`,
+              }}
+              coordinate={data}
+              identifier={`${i}`}
+            />
+          ))}
+        </>
       )}
     </MapView>
   );

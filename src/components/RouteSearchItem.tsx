@@ -1,15 +1,25 @@
+import {NavigationProp, useNavigation} from '@react-navigation/native';
 import React, {memo} from 'react';
 import {TouchableOpacity, View, StyleSheet, Text} from 'react-native';
 import {IRoute} from '../models/route';
+import {RootStackParamList} from '../navigators/RootStackNavigator';
 
 interface Props {
   route?: IRoute;
 }
 
 const RouteSearchItem = memo((props: Props) => {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const {route} = props;
+
+  const onPress = () => {
+    navigation.navigate('RouteResult', {
+      routeData: route,
+    });
+  };
+
   return (
-    <TouchableOpacity style={styles.container}>
+    <TouchableOpacity style={styles.container} onPress={onPress}>
       <View style={styles.titleRow}>
         <Text
           numberOfLines={3}

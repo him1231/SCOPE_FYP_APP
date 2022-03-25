@@ -3,6 +3,7 @@ import {
   API_ROUTE_DATA,
   API_ROUTE_DATA_FROM_SERVER,
   API_ROUTE_STOP_DATA,
+  API_ROUTE_STOP_DATA_FROM_SERVER,
   API_STOP_DATA,
   API_STOP_DATA_FROM_SERVER,
 } from '../constants/api';
@@ -11,6 +12,7 @@ import {
   IRouteApi,
   IRouteApiFromServer,
   IRouteStopApi,
+  IRouteStopApiFromServer,
   IStopApi,
   IStopApiFromServer,
 } from '../models/route';
@@ -40,6 +42,18 @@ export const getRouteDataFromServer = async () => {
     const response = await fetch(API_ROUTE_DATA_FROM_SERVER);
     const json = await response.json();
     return json as IRouteApiFromServer;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getRouteStopDataFromServer = async (route: string) => {
+  try {
+    const response = await fetch(
+      API_ROUTE_STOP_DATA_FROM_SERVER + `?routeId=${route}`,
+    );
+    const json = await response.json();
+    return json as IRouteStopApiFromServer;
   } catch (error) {
     throw error;
   }

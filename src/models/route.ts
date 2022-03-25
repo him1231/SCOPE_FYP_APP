@@ -45,6 +45,30 @@ export type IRouteApiFromServer = {
   }[];
 };
 
+export type IRouteStopApiFromServer = {
+  status: string;
+  data: IRouteStopFromServer[];
+};
+
+export type IRouteStopFromServer = {
+  _id: string;
+  key: string;
+  createdAt: string;
+  route: string;
+  seq: 1;
+  stop: {
+    _id: string;
+    stopId: string;
+    lat: 22.34535;
+    locationType: string;
+    lon: 114.19244;
+    name: string;
+    zoneId: string;
+  };
+  updatedAt: string;
+  bound: string;
+};
+
 export type IRouteStop = {
   route: string;
   bound: string;
