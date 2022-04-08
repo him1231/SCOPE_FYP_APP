@@ -4,3 +4,8 @@ export const centerOfHongKong = {
   latitudeDelta: 0.0461,
   longitudeDelta: 0.021,
 };
+export interface RouteLocation {
+  description: string;
+  latitude: number;
+  longitude: number;
+}

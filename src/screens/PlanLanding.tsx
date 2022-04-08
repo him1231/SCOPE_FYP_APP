@@ -1,6 +1,6 @@
 import {getDistance} from 'geolib';
 import React, {useState} from 'react';
-import {StyleSheet} from 'react-native';
+import {Alert, StyleSheet, View} from 'react-native';
 import {LatLng} from 'react-native-maps';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
@@ -14,7 +14,6 @@ import {
   selectRouteData,
   selectStopData,
 } from '../redux/selectors/route';
-import {route} from '../utils/route';
 import {merge} from 'lodash';
 import {INodeData, PlanResult} from '../models/route';
 import {humanWalkingSpeed} from '../constants/route';
@@ -22,6 +21,10 @@ import {savePlanResult} from '../redux/actions/route';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {PlanStackParamList} from '../navigators/PlanStackNavigator';
 import image from '../image';
+import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
+import {RouteLocation} from '../constants/map';
+
+navigator.geolocation = require('@react-native-community/geolocation');
 
 const locationString = (location: LatLng) =>
   `lat:${location?.latitude.toFixed(3)}, 
@@ -31,130 +34,147 @@ const PlanLanding = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation<NavigationProp<PlanStackParamList>>();
 
-  const routeData = useSelector(selectRouteData);
-  const stopData = useSelector(selectStopData);
-  const nodeData = useSelector(selectNodeData);
-  const [startLatLng, setStartLatLng] = useState<LatLng | undefined>(undefined);
-  const [endLatLng, setEndLatLng] = useState<LatLng | undefined>(undefined);
+  // const routeData = useSelector(selectRouteData);
+  // const stopData = useSelector(selectStopData);
+  // const nodeData = useSelector(selectNodeData);
+  // const [startLatLng, setStartLatLng] = useState<LatLng | undefined>(undefined);
+  // const [endLatLng, setEndLatLng] = useState<LatLng | undefined>(undefined);
+  const [startRouteLocation, setStartRouteLocation] = useState<
+    RouteLocation | undefined
+  >(undefined);
+  const [endRouteLocation, setEndRouteLocation] = useState<
+    RouteLocation | undefined
+  >(undefined);
+
+  const [shouldShowSearchScreen, setShouldShowSearchScreen] = useState<
+    'start' | 'end' | false
+  >(false);
 
   const onPressGo = () => {
-    if (startLatLng !== undefined && endLatLng !== undefined) {
-      const newNoteData: INodeData = {start: {}, end: {}};
-
-      const startCoord = {
-        lat: startLatLng.latitude,
-        lon: startLatLng.longitude,
-      };
-      const endCoord = {lat: endLatLng.latitude, lon: endLatLng.longitude};
-
-      stopData.forEach(stop => {
-        const stopCoord = {lat: stop.lat, lon: stop.long};
-        const startDistance = getDistance(startCoord, stopCoord);
-        if (startDistance < 300) {
-          newNoteData['start'][stop.stop] =
-            (startDistance / 1000 / humanWalkingSpeed) * 60;
-        }
-
-        const endDistance = getDistance(stopCoord, endCoord);
-        if (endDistance < 300) {
-          newNoteData[stop.stop] = {};
-          newNoteData[stop.stop]['end'] =
-            (endDistance / 1000 / humanWalkingSpeed) * 60;
-        }
+    if (startRouteLocation !== undefined && endRouteLocation !== undefined) {
+      navigation.navigate('PlanResult', {
+        startRouteLocation: startRouteLocation,
+        endRouteLocation: endRouteLocation,
       });
-
-      const avoidCarList = routeData
-        .filter(item => item.name_sc?.startsWith('N'))
-        .map(item => item.route);
-
-      const avoidList: string[] = [
-        ...Object.keys(nodeData).filter(item =>
-          avoidCarList.some(car => item.startsWith(car + '-')),
-        ),
-      ];
-
-      const planResults: PlanResult[] = [];
-
-      for (let _ of [...Array(3)]) {
-        const result: PlanResult = route(
-          merge(JSON.parse(JSON.stringify(nodeData)), newNoteData),
-          'start',
-          'end',
-          avoidList,
-        );
-
-        if (result.path !== null) {
-          planResults.push(result);
-          const car = result.path.find(item => item.split('-').length === 3);
-          if (car) {
-            const avoidCarList = Object.keys(nodeData).filter(key =>
-              key.startsWith(car.split('-')[0] + '-'),
-            );
-
-            avoidList.push(...avoidCarList);
-          }
-        } else {
-          break;
-        }
-      }
-
-      dispatch(savePlanResult(planResults));
-      navigation.navigate('PlanResult');
     } else {
-      // test();
+      Alert.alert('Missing Location');
     }
   };
 
-  // const test = () => {
-  //   const newNodeData = Object.fromEntries(
-  //     new Map(
-  //       Object.entries(nodeData).map(item => {
-  //         const [nodeKey, nodeValue] = item;
-  //         const test = Object.entries(nodeValue);
-  //         const newTest = test.map(item => {
-  //           const newItem: [string, number] = [
-  //             item[0],
-  //             item[1] * 1 + item[1] * 2 + item[1] * 3 + item[1] * 4,
-  //           ];
-  //           return newItem;
-  //         });
-  //         const entries = new Map(newTest);
-  //         const obj = Object.fromEntries(entries);
-  //         return [nodeKey, obj];
-  //       }),
-  //     ),
-  //   );
-  // };
+  const SearchScreen = () => {
+    return (
+      <SafeAreaView style={styles.searchContainer}>
+        <GooglePlacesAutocomplete
+          placeholder="Search"
+          fetchDetails={true}
+          onPress={(data, details = null) => {
+            // 'details' is provided when fetchDetails = true
+            console.log(data, details);
+            setShouldShowSearchScreen(false);
+            if (details) {
+              const routeLocation = {
+                description: data.description ?? 'Current Location',
+                latitude: details.geometry.location.lat,
+                longitude: details.geometry.location.lng,
+              };
+              setTimeout(() => {
+                switch (shouldShowSearchScreen) {
+                  case 'start':
+                    setStartRouteLocation(routeLocation);
+                    break;
+                  case 'end':
+                    setEndRouteLocation(routeLocation);
+                    break;
+                }
+              }, 100);
+            } else {
+              Alert.alert('Location undefined');
+            }
+          }}
+          onFail={error => {
+            console.log('onFail error', error);
+          }}
+          onNotFound={() => {
+            console.log('onNotFound');
+          }}
+          onTimeout={() => {
+            console.log('onTimeout');
+          }}
+          query={{
+            key: 'AIzaSyANH0uHnyZLiNFDKH9T0_S4aRVcgpnFCBI',
+            language: 'en',
+            components: 'country:hk',
+          }}
+          GooglePlacesDetailsQuery={{fields: 'geometry'}}
+          currentLocation={true}
+          currentLocationLabel="Current location"
+        />
+      </SafeAreaView>
+    );
+  };
+
+  const onPickStartFromMap = (location: LatLng) => {
+    setStartRouteLocation({
+      description: 'Selected Start Location',
+      latitude: location.latitude,
+      longitude: location.longitude,
+    });
+  };
+
+  const onPickEndFromMap = (location: LatLng) => {
+    setEndRouteLocation({
+      description: 'Selected End Location',
+      latitude: location.latitude,
+      longitude: location.longitude,
+    });
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <CustomMap
-        setStartLocation={setStartLatLng}
-        setEndLocation={setEndLatLng}
-      />
-      <CustomInput
-        iconStyle={{tintColor: 'red'}}
-        icon={image.ICON.CIRCLE}
-        title="start:"
-        placeholder="select the start location"
-        initValue={startLatLng ? locationString(startLatLng) : undefined}
-      />
-      <Separator />
-      <CustomInput
-        iconStyle={{tintColor: 'lime'}}
-        icon={image.ICON.CIRCLE}
-        title="end:"
-        placeholder="select the end location"
-        initValue={endLatLng ? locationString(endLatLng) : undefined}
-      />
+    <>
+      <SafeAreaView style={styles.container}>
+        <CustomMap
+          startLocation={startRouteLocation}
+          endLocation={endRouteLocation}
+          setStartLocation={onPickStartFromMap}
+          setEndLocation={onPickEndFromMap}
+        />
+        <Separator />
 
-      <CustomButton
-        style={[styles.circleButton, Shadow]}
-        textStyle={styles.circleButtonText}
-        text={'GO'}
-        onPress={onPressGo}
-      />
-    </SafeAreaView>
+        <CustomInput
+          iconStyle={{tintColor: 'red'}}
+          icon={image.ICON.CIRCLE}
+          title="start:"
+          placeholder="select the start location"
+          initValue={
+            startRouteLocation ? startRouteLocation.description : undefined
+          }
+          onPress={() => {
+            setShouldShowSearchScreen('start');
+          }}
+        />
+        <Separator />
+        <CustomInput
+          iconStyle={{tintColor: 'lime'}}
+          icon={image.ICON.CIRCLE}
+          title="end:"
+          placeholder="select the end location"
+          initValue={
+            endRouteLocation ? endRouteLocation.description : undefined
+          }
+          onPress={() => {
+            setShouldShowSearchScreen('end');
+          }}
+        />
+
+        <CustomButton
+          style={[styles.circleButton, Shadow]}
+          textStyle={styles.circleButtonText}
+          text={'GO'}
+          onPress={onPressGo}
+        />
+      </SafeAreaView>
+      {shouldShowSearchScreen && <SearchScreen />}
+    </>
   );
 };
 
@@ -162,6 +182,13 @@ const styles = StyleSheet.create({
   container: {
     height: '100%',
     alignItems: 'center',
+  },
+  searchContainer: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    padding: 20,
+    backgroundColor: 'grey',
   },
   circleButton: {
     width: 50,

@@ -1,7 +1,7 @@
 import Graph from 'node-dijkstra';
 import {INodeData} from '../models/route';
 
-export const route = (
+export const routePlanning = (
   node: INodeData,
   start: string,
   end: string,

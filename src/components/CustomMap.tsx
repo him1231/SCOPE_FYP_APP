@@ -16,6 +16,8 @@ interface Props {
   useGoogleMap?: boolean;
   initialRegion?: Region;
   style?: StyleProp<ViewStyle>;
+  startLocation?: LatLng;
+  endLocation?: LatLng;
   setStartLocation?: (_: LatLng) => void;
   setEndLocation?: (_: LatLng) => void;
   disableSelect?: boolean;
@@ -28,6 +30,8 @@ const CustomMap: React.FC<Props> = React.memo(props => {
     style,
     useGoogleMap,
     initialRegion = centerOfHongKong,
+    startLocation,
+    endLocation,
     setStartLocation,
     setEndLocation,
     disableSelect,
@@ -61,6 +65,26 @@ const CustomMap: React.FC<Props> = React.memo(props => {
     }
   }, [focusMarkers]);
 
+  useEffect(() => {
+    setStartCoord(startLocation);
+  }, [startLocation]);
+
+  useEffect(() => {
+    setEndCoord(endLocation);
+  }, [endLocation]);
+
+  useEffect(() => {
+    const markers: string[] = [];
+    if (startCoord) markers.push('start');
+    if (endCoord) markers.push('end');
+    if (markers.length > 0) {
+      mapRef?.fitToSuppliedMarkers(markers, {
+        animated: true,
+        edgePadding: {top: 250, left: 50, right: 50, bottom: 50},
+      });
+    }
+  }, [startCoord, endCoord]);
+
   var mapRef: MapView | null = null;
 
   return (
@@ -69,7 +93,7 @@ const CustomMap: React.FC<Props> = React.memo(props => {
         mapRef = ref;
       }}
       userInterfaceStyle={'light'}
-      provider={useGoogleMap ? PROVIDER_GOOGLE : PROVIDER_DEFAULT}
+      provider={PROVIDER_GOOGLE} //useGoogleMap ? PROVIDER_GOOGLE : PROVIDER_DEFAULT}
       style={[styles.map, style]}
       initialRegion={initialRegion}
       onPress={e => {
@@ -82,9 +106,11 @@ const CustomMap: React.FC<Props> = React.memo(props => {
           setEndLocation={onSetEndLocation}
         />
       )}
-      {startCoord !== undefined && <Marker coordinate={startCoord} />}
+      {startCoord !== undefined && (
+        <Marker identifier={'start'} coordinate={startCoord} pinColor={'red'} />
+      )}
       {endCoord !== undefined && (
-        <Marker coordinate={endCoord} pinColor={'lime'} />
+        <Marker identifier={'end'} coordinate={endCoord} pinColor={'lime'} />
       )}
       {startCoord && endCoord && (
         <Polyline coordinates={[startCoord, endCoord]} lineDashPattern={[5]} />
