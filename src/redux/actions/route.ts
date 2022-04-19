@@ -1,6 +1,9 @@
+import {Place} from 'react-native-google-places-autocomplete';
 import {action} from 'typesafe-actions';
+import {RouteLocation} from '../../constants/map';
 import {
   INodeData,
+  IRoute,
   IRouteApi,
   IRouteStopApi,
   IStopApi,
@@ -57,3 +60,26 @@ export const getNodeDataFail = (error: Error) =>
 export const SAVE_PLAN_RESULT = 'SAVE_PLAN_RESULT';
 export const savePlanResult = (data: PlanResult[]) =>
   action(SAVE_PLAN_RESULT, {data});
+
+export const SAVE_LOCATION_HISTORY = 'SAVE_LOCATION_HISTORY';
+export const saveLocationHistory = (place: Place) =>
+  action(SAVE_LOCATION_HISTORY, {place});
+
+export const SAVE_ROUTE_HISTORY = 'SAVE_ROUTE_HISTORY';
+export const saveRouteHistory = (route: IRoute) =>
+  action(SAVE_ROUTE_HISTORY, {route});
+
+export const ROUTE_PLANNING = 'ROUTE_PLANNING';
+export const ROUTE_PLANNING_SUCCESS = 'ROUTE_PLANNING_SUCCESS';
+export const ROUTE_PLANNING_FAIL = 'ROUTE_PLANNING_FAIL';
+
+export const asyncRoutePlanning = (
+  startLocation: RouteLocation,
+  endLocation: RouteLocation,
+) => action(ROUTE_PLANNING, {startLocation, endLocation});
+
+export const asyncRoutePlanningSuccess = (result: PlanResult[]) =>
+  action(ROUTE_PLANNING_SUCCESS, {result});
+
+export const asyncRoutePlanningFail = (error: Error) =>
+  action(ROUTE_PLANNING_FAIL, {error});

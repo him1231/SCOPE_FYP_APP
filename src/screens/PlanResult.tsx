@@ -30,7 +30,7 @@ import {humanWalkingSpeed} from '../constants/route';
 import image from '../image';
 import {INodeData, PlanResult} from '../models/route';
 import {PlanStackParamList} from '../navigators/PlanStackNavigator';
-import {savePlanResult} from '../redux/actions/route';
+import {asyncRoutePlanning} from '../redux/actions/route';
 import {
   selectNodeData,
   selectPlanResult,
@@ -40,7 +40,7 @@ import {
 import {routePlanning} from '../utils/routePlanning';
 
 const RouteResult = () => {
-  // const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   // const data = useSelector(selectPlanResult);
   const routeData = useSelector(selectRouteData);
@@ -62,7 +62,8 @@ const RouteResult = () => {
 
   useEffect(() => {
     if (startPlaceData && endPlaceData && planResult === undefined) {
-      getRoutePlanningResult(startPlaceData, endPlaceData);
+      // getRoutePlanningResult(startPlaceData, endPlaceData);
+      dispatch(asyncRoutePlanning(startPlaceData, endPlaceData));
     }
   }, [planResult]);
 

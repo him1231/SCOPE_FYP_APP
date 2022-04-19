@@ -8,7 +8,6 @@ import {
   API_STOP_DATA_FROM_SERVER,
 } from '../constants/api';
 import {
-  INodeData,
   IRouteApi,
   IRouteApiFromServer,
   IRouteStopApi,

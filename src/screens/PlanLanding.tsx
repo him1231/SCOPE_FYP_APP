@@ -1,6 +1,6 @@
 import {getDistance} from 'geolib';
 import React, {useState} from 'react';
-import {Alert, StyleSheet, View} from 'react-native';
+import {Alert, StyleSheet, TouchableOpacity, View} from 'react-native';
 import {LatLng} from 'react-native-maps';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {useDispatch, useSelector} from 'react-redux';
@@ -10,14 +10,14 @@ import CustomMap from '../components/CustomMap';
 import Separator from '../components/Separator';
 import Shadow from '../components/styles/Shadow';
 import {
+  selectLocationHistory,
   selectNodeData,
   selectRouteData,
   selectStopData,
 } from '../redux/selectors/route';
 import {merge} from 'lodash';
-import {INodeData, PlanResult} from '../models/route';
 import {humanWalkingSpeed} from '../constants/route';
-import {savePlanResult} from '../redux/actions/route';
+import {saveLocationHistory, savePlanResult} from '../redux/actions/route';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {PlanStackParamList} from '../navigators/PlanStackNavigator';
 import image from '../image';
@@ -39,6 +39,9 @@ const PlanLanding = () => {
   // const nodeData = useSelector(selectNodeData);
   // const [startLatLng, setStartLatLng] = useState<LatLng | undefined>(undefined);
   // const [endLatLng, setEndLatLng] = useState<LatLng | undefined>(undefined);
+
+  const locationHistory = useSelector(selectLocationHistory);
+
   const [startRouteLocation, setStartRouteLocation] = useState<
     RouteLocation | undefined
   >(undefined);
@@ -64,51 +67,71 @@ const PlanLanding = () => {
   const SearchScreen = () => {
     return (
       <SafeAreaView style={styles.searchContainer}>
-        <GooglePlacesAutocomplete
-          placeholder="Search"
-          fetchDetails={true}
-          onPress={(data, details = null) => {
-            // 'details' is provided when fetchDetails = true
-            console.log(data, details);
-            setShouldShowSearchScreen(false);
-            if (details) {
-              const routeLocation = {
-                description: data.description ?? 'Current Location',
-                latitude: details.geometry.location.lat,
-                longitude: details.geometry.location.lng,
-              };
-              setTimeout(() => {
-                switch (shouldShowSearchScreen) {
-                  case 'start':
-                    setStartRouteLocation(routeLocation);
-                    break;
-                  case 'end':
-                    setEndRouteLocation(routeLocation);
-                    break;
-                }
-              }, 100);
-            } else {
-              Alert.alert('Location undefined');
-            }
-          }}
-          onFail={error => {
-            console.log('onFail error', error);
-          }}
-          onNotFound={() => {
-            console.log('onNotFound');
-          }}
-          onTimeout={() => {
-            console.log('onTimeout');
-          }}
-          query={{
-            key: 'AIzaSyANH0uHnyZLiNFDKH9T0_S4aRVcgpnFCBI',
-            language: 'en',
-            components: 'country:hk',
-          }}
-          GooglePlacesDetailsQuery={{fields: 'geometry'}}
-          currentLocation={true}
-          currentLocationLabel="Current location"
-        />
+        <TouchableOpacity
+          style={{flex: 1}}
+          onPress={() => setShouldShowSearchScreen(false)}
+          activeOpacity={1}>
+          <GooglePlacesAutocomplete
+            placeholder="Search"
+            fetchDetails={true}
+            onPress={(data, details = null) => {
+              // 'details' is provided when fetchDetails = true
+              console.log('GooglePlaceData: ', data);
+              console.log('GooglePlaceDetail: ', details);
+              setShouldShowSearchScreen(false);
+              if (details) {
+                const routeLocation = {
+                  description: data.description ?? 'Current Location',
+                  latitude: details.geometry.location.lat,
+                  longitude: details.geometry.location.lng,
+                };
+
+                dispatch(
+                  saveLocationHistory({
+                    description: routeLocation.description,
+                    geometry: {
+                      location: {
+                        lat: routeLocation.latitude,
+                        lng: routeLocation.longitude,
+                      },
+                    },
+                  }),
+                );
+
+                setTimeout(() => {
+                  switch (shouldShowSearchScreen) {
+                    case 'start':
+                      setStartRouteLocation(routeLocation);
+                      break;
+                    case 'end':
+                      setEndRouteLocation(routeLocation);
+                      break;
+                  }
+                }, 20);
+              } else {
+                Alert.alert('Location undefined');
+              }
+            }}
+            onFail={error => {
+              console.log('onFail error', error);
+            }}
+            onNotFound={() => {
+              console.log('onNotFound');
+            }}
+            onTimeout={() => {
+              console.log('onTimeout');
+            }}
+            query={{
+              key: 'AIzaSyANH0uHnyZLiNFDKH9T0_S4aRVcgpnFCBI',
+              language: 'en',
+              components: 'country:hk',
+            }}
+            GooglePlacesDetailsQuery={{fields: 'geometry'}}
+            currentLocation={true}
+            currentLocationLabel="Current location"
+            predefinedPlaces={locationHistory}
+          />
+        </TouchableOpacity>
       </SafeAreaView>
     );
   };
@@ -148,9 +171,8 @@ const PlanLanding = () => {
           initValue={
             startRouteLocation ? startRouteLocation.description : undefined
           }
-          onPress={() => {
-            setShouldShowSearchScreen('start');
-          }}
+          onPress={() => setShouldShowSearchScreen('start')}
+          onClearText={() => setStartRouteLocation(undefined)}
         />
         <Separator />
         <CustomInput
@@ -161,9 +183,8 @@ const PlanLanding = () => {
           initValue={
             endRouteLocation ? endRouteLocation.description : undefined
           }
-          onPress={() => {
-            setShouldShowSearchScreen('end');
-          }}
+          onPress={() => setShouldShowSearchScreen('end')}
+          onClearText={() => setEndRouteLocation(undefined)}
         />
 
         <CustomButton

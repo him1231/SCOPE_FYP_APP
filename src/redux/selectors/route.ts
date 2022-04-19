@@ -27,3 +27,11 @@ export const selectPlanResult = createSelector(
   selectRouteState,
   state => state.get('planResults') ?? [],
 );
+
+export const selectLocationHistory = createSelector(selectRouteState, state =>
+  state.get('locationHistory'),
+);
+
+export const selectRouteHistory = createSelector(selectRouteState, state =>
+  state.get('routeHistory'),
+);

@@ -133,14 +133,14 @@ const CustomMap: React.FC<Props> = React.memo(props => {
           {lineData.map((data, i) => (
             <Marker
               key={i}
-              image={image.ICON.TRANSPARENT}
-              style={{
-                backgroundColor: 'white',
-                borderRadius: 8,
-                borderWidth: 4,
-                borderColor: `rgb(${255 * (1 - i / lineData.length)},
-                ${255 * (i / lineData.length)},0)`,
-              }}
+              // image={image.ICON.TRANSPARENT}
+              // style={{
+              //   backgroundColor: 'white',
+              //   borderRadius: 8,
+              //   borderWidth: 4,
+              //   borderColor: `rgb(${255 * (1 - i / lineData.length)},
+              //   ${255 * (i / lineData.length)},0)`,
+              // }}
               coordinate={data}
               identifier={`${i}`}
             />

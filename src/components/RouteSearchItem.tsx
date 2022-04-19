@@ -6,6 +6,7 @@ import {RootStackParamList} from '../navigators/RootStackNavigator';
 
 interface Props {
   route?: IRoute;
+  onPress?: (route?: IRoute) => void;
 }
 
 const RouteSearchItem = memo((props: Props) => {
@@ -13,6 +14,8 @@ const RouteSearchItem = memo((props: Props) => {
   const {route} = props;
 
   const onPress = () => {
+    if (props.onPress) props.onPress(route);
+
     navigation.navigate('RouteResult', {
       routeData: route,
     });

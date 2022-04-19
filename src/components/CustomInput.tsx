@@ -67,17 +67,23 @@ const CustomInput = React.memo((props: Props) => {
           {title}
         </Text>
       )}
-      <TextInput
-        defaultValue={initValue}
-        editable={onPress === undefined}
-        ref={textInputRef}
-        style={styles.textInput}
-        placeholder={placeholder}
-        placeholderTextColor={'lightgrey'}
-        value={value}
-        onChangeText={onChangeText}
-      />
-      {value !== undefined && (
+      {onPress !== undefined ? (
+        <Text style={{flex: 1, color: initValue ? 'black' : 'lightgrey'}}>
+          {initValue ?? placeholder}
+        </Text>
+      ) : (
+        <TextInput
+          defaultValue={initValue}
+          editable={onPress === undefined}
+          ref={textInputRef}
+          style={styles.textInput}
+          placeholder={placeholder}
+          placeholderTextColor={'lightgrey'}
+          value={value}
+          onChangeText={onChangeText}
+        />
+      )}
+      {initValue !== undefined && (
         <TouchableOpacity
           style={styles.clearButton}
           onPress={onPressClearButton}>

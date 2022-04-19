@@ -1,5 +1,6 @@
 import {getDistance} from 'geolib';
 import {call, put, select, takeLatest} from 'redux-saga/effects';
+import {ActionType} from 'typesafe-actions';
 import {
   getNodeDataFromServer,
   getRouteDataFromApi,
@@ -11,6 +12,7 @@ import {
 import {humanWalkingSpeed, normalCarSpeed} from '../../constants/route';
 import {
   INodeData,
+  IRoute,
   IRouteApi,
   IRouteApiFromServer,
   IRouteStop,
@@ -18,9 +20,13 @@ import {
   IStop,
   IStopApi,
   IStopApiFromServer,
+  PlanResult,
 } from '../../models/route';
 import {hideLoading, showLoading} from '../actions/general';
 import {
+  asyncRoutePlanning,
+  asyncRoutePlanningFail,
+  asyncRoutePlanningSuccess,
   getNodeDataFail,
   getNodeDataSuccess,
   getRouteDataFail,
@@ -33,11 +39,13 @@ import {
   GET_ROUTE_DATA,
   GET_ROUTE_STOP_DATA,
   GET_STOP_DATA,
+  ROUTE_PLANNING,
   updateNodeDataSuccess,
   UPDATE_NODE_DATA,
 } from '../actions/route';
 import {
   selectNodeData,
+  selectRouteData,
   selectRouteStopData,
   selectStopData,
 } from '../selectors/route';
@@ -93,7 +101,7 @@ function* handleGetRouteDataFromServer(): any {
       data: result.data.map(item => ({
         route: item.routeId,
         bound: '',
-        service_type: '',
+        service_type: '1',
         name_en: item.shortName,
         name_tc: item.shortName,
         name_sc: item.shortName,
@@ -234,10 +242,66 @@ function* handleGetNodeData(): any {
   }
 }
 
+function* handleRoutePlanning(
+  action: ActionType<typeof asyncRoutePlanning>,
+): any {
+  try {
+    // yield put(showLoading());
+    const {startLocation, endLocation} = action.payload;
+    const stopData: IStop[] = yield select(selectStopData);
+    const routeData: IRoute[] = yield select(selectRouteData);
+    const nodeData: INodeData = yield select(selectNodeData);
+
+    console.log('start route @ ', new Date());
+
+    const newNoteData: INodeData = {start: {}, end: {}};
+
+    const startCoord = {
+      lat: startLocation.latitude,
+      lon: startLocation.longitude,
+    };
+    const endCoord = {lat: endLocation.latitude, lon: endLocation.longitude};
+
+    stopData.forEach(stop => {
+      const stopCoord = {lat: stop.lat, lon: stop.long};
+      const startDistance = getDistance(startCoord, stopCoord);
+      if (startDistance < 300) {
+        newNoteData['start'][stop.stop] =
+          (startDistance / 1000 / humanWalkingSpeed) * 60;
+      }
+
+      const endDistance = getDistance(stopCoord, endCoord);
+      if (endDistance < 300) {
+        newNoteData[stop.stop] = {};
+        newNoteData[stop.stop]['end'] =
+          (endDistance / 1000 / humanWalkingSpeed) * 60;
+      }
+    });
+
+    const avoidCarList = routeData
+      .filter(item => item.name_sc?.startsWith('N'))
+      .map(item => item.route);
+
+    const avoidList: string[] = [
+      ...Object.keys(nodeData).filter(item =>
+        avoidCarList.some(car => item.startsWith(car + '-')),
+      ),
+    ];
+
+    const planResults: PlanResult[] = [];
+    yield put(asyncRoutePlanningSuccess(planResults));
+  } catch (err: any) {
+    yield put(asyncRoutePlanningFail(err));
+  } finally {
+    // yield put(hideLoading());
+  }
+}
+
 export function* watchHandleRoute() {
   yield takeLatest(GET_STOP_DATA, handleGetStopDataFromServer);
   yield takeLatest(GET_ROUTE_STOP_DATA, handleGetRouteStopData);
   yield takeLatest(GET_ROUTE_DATA, handleGetRouteDataFromServer);
   yield takeLatest(UPDATE_NODE_DATA, handleUpdateNodeData);
   yield takeLatest(GET_NODE_DATA, handleGetNodeData);
+  yield takeLatest(ROUTE_PLANNING, handleRoutePlanning);
 }
